@@ -21,11 +21,12 @@ import java.util.Arrays;
 public class MainActivity extends AppCompatActivity {
 
     private static final String [] ALPHABETARRAY = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
-    private static final String ALPHABETSTRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String ALPHABETSTRING = "abcdefghijklmnopqrstuvwxyz";
 
     //Initizlize Java side variables for corresponding res objects.
     private Button b_encrypt;
     private Button b_decrypt;
+    private Button b_clear;
 
     private EditText et_plainText;
     private EditText et_cipherText;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         init();
     }
 
@@ -45,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         //Assign "res" ids to the java side variables
         b_encrypt = (Button)findViewById(R.id.encrypt_b);
         b_decrypt = (Button)findViewById(R.id.decrypt_b);
+        b_clear = (Button)findViewById(R.id.clear_b);
 
         et_plainText = (EditText)findViewById(R.id.plainText_et);
         et_cipherText = (EditText)findViewById(R.id.cipherText_et);
@@ -52,10 +55,16 @@ public class MainActivity extends AppCompatActivity {
 
         tv_key = (TextView)findViewById(R.id.key_tv);
 
+        et_plainText.setText("");
+        et_cipherText.setText("");
+        et_shift.setText("");
+        tv_key.setText("Key");
+
         b_encrypt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d("Encrypt", "Button Pressed");
+                encrypt();
             }
         });
 
@@ -63,8 +72,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Log.d("Decrypt", "Button Pressed");
+                decrypt();
             }
         });
+
+        b_clear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                et_plainText.setText("");
+                et_cipherText.setText("");
+                et_shift.setText("");
+                tv_key.setText("Key");
+            }
+        });
+
 
     }
 
@@ -104,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
 
         //check for proper shift values
         if(_shift > 25 || _shift < 0) {
-            Toast.makeText(MainActivity.this, "Illegal shift number: " + _shift, Toast.LENGTH_SHORT );
+            Toast.makeText(MainActivity.this, "Illegal shift number: " + _shift, Toast.LENGTH_SHORT ).show();
             _shift = 0;
         }
         return _shift;
@@ -112,11 +133,45 @@ public class MainActivity extends AppCompatActivity {
 
     private void decrypt(){
         String answer = "";
-        String encryptText = "";
+        String encryptText = et_cipherText.getText().toString().replaceAll("\\s+","").toLowerCase();
         ArrayList<String> _shifted = new ArrayList<>();
-        int _shift = loadShift();
-        _shifted = createShiftedAlphabet(_shift);
-        encryptText = et_cipherText.getText().toString();
 
+        //Get shift number
+        int _shift = loadShift();
+
+        //Create shifted array with said shift number
+        _shifted = createShiftedAlphabet(_shift);
+
+        for(int i=0; i<encryptText.length(); ++i){
+            Character character = encryptText.charAt(i);
+            String s_Char = character.toString();
+            int Index = _shifted.indexOf(s_Char);
+            System.out.println(ALPHABETARRAY[Index]);
+            answer = answer.concat(ALPHABETARRAY[Index]);
+            System.out.println(answer);
+        }
+        tv_key.setText(answer);
+    }
+
+    private void encrypt(){
+        String answer = "";
+        String decryptText = et_plainText.getText().toString().replaceAll("\\s+","").toLowerCase();
+        ArrayList<String> _shifted = new ArrayList<>();
+
+        //Get shift number
+        int _shift = loadShift();
+
+        //Create shifted array with said shift number
+        _shifted = createShiftedAlphabet(_shift);
+
+        for(int i=0; i<decryptText.length(); ++i){
+            Character character = decryptText.charAt(i);
+            String s_Char = character.toString();
+            int Index = ALPHABETSTRING.indexOf(s_Char);
+            System.out.println(_shifted.get(Index));
+            answer = answer.concat(_shifted.get(Index));
+            System.out.println(answer);
+        }
+        tv_key.setText(answer);
     }
 }
